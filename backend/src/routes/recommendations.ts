@@ -42,39 +42,8 @@ recommendationsRouter.post('/', async (req, res) => {
 
     console.log(`→ Generating recommendations for ${location1} vs ${location2}`);
 
-    // Detect region for location-aware expertise
-    const detectRegion = (loc: string): string => {
-      const lower = loc.toLowerCase();
-      if (lower.includes('bay area') || lower.includes('san francisco') || lower.includes('oakland') || 
-          lower.includes('berkeley') || lower.includes('san jose') || lower.includes('palo alto')) {
-        return 'Bay Area';
-      }
-      if (lower.includes('los angeles') || lower.includes('san diego') || lower.includes('california')) {
-        return 'California';
-      }
-      if (lower.includes('new york') || lower.includes('brooklyn') || lower.includes('manhattan')) {
-        return 'New York';
-      }
-      if (lower.includes('seattle') || lower.includes('washington')) {
-        return 'Pacific Northwest';
-      }
-      if (lower.includes('miami') || lower.includes('florida')) {
-        return 'Florida';
-      }
-      if (lower.includes('chicago') || lower.includes('illinois')) {
-        return 'Midwest';
-      }
-      return 'this region';
-    };
-
-    const region1 = detectRegion(location1);
-    const region2 = detectRegion(location2);
-    const primaryRegion = region1 !== 'this region' ? region1 : region2;
-    
-    // Build location-aware system prompt
-    const systemPrompt = primaryRegion === 'Bay Area'
-      ? 'You are a knowledgeable Bay Area weather expert who provides practical, concise advice about microclimates, fog patterns, and what to bring based on weather conditions.'
-      : `You are a knowledgeable weather expert with expertise in ${primaryRegion} weather patterns. You provide practical, concise advice about local climate, weather variations, and what to bring based on weather conditions.`;
+    // Build location-aware system prompt that lets AI infer regional expertise
+    const systemPrompt = `You are a knowledgeable weather expert providing advice for ${location1} and ${location2}. Use your knowledge of local weather patterns, microclimates, and regional climate to give practical, specific recommendations.`;
 
     // Get current date, time, and season
     const now = new Date();
