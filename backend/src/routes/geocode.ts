@@ -104,7 +104,7 @@ geocodeRouter.get('/', async (req, res) => {
       throw new Error(`Nominatim API error: ${response.status}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as any[];
 
     if (isAutocomplete) {
       console.log(`  Found ${data.length} results for autocomplete`);

@@ -75,7 +75,7 @@ weatherRouter.get('/', async (req, res) => {
       throw new Error(`Weather.gov points API error: ${pointsResponse.status}`);
     }
 
-    const pointsData: GridPoint = await pointsResponse.json();
+    const pointsData = await pointsResponse.json() as GridPoint;
     const forecastHourlyUrl = pointsData.properties.forecastHourly;
 
     // Step 2: Get hourly forecast
@@ -87,7 +87,7 @@ weatherRouter.get('/', async (req, res) => {
       throw new Error(`Weather.gov forecast API error: ${forecastResponse.status}`);
     }
 
-    const forecastData = await forecastResponse.json();
+    const forecastData = await forecastResponse.json() as any;
     const periods: WeatherPeriod[] = forecastData.properties.periods;
 
     // Get current conditions + today's hourly forecast (next 12 hours)
