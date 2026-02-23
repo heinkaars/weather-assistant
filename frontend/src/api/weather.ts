@@ -1,4 +1,4 @@
-import type { WeatherComparisonData, WeatherData } from '../types';
+import type { WeatherComparisonData, WeatherData, LocationSuggestion } from '../types';
 
 // Use env in production (e.g. Render backend URL); same-origin /api in dev (Vite proxy)
 const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
@@ -19,6 +19,27 @@ export async function geocodeLocation(location: string): Promise<GeocodeResponse
   }
   
   return response.json();
+}
+
+export async function fetchLocationSuggestions(query: string): Promise<LocationSuggestion[]> {
+  if (query.length < 2) {
+    return [];
+  }
+
+  try {
+    const response = await fetch(
+      `${API_BASE}/geocode?location=${encodeURIComponent(query)}&autocomplete=true`
+    );
+    
+    if (response.ok) {
+      const data = await response.json();
+      return data.suggestions || [];
+    }
+    return [];
+  } catch (error) {
+    console.error('Autocomplete error:', error);
+    return [];
+  }
 }
 
 export async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {

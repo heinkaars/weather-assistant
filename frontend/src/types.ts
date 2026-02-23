@@ -34,3 +34,9 @@ export interface WeatherComparisonData {
   location1: LocationData;
   location2: LocationData;
 }
+
+export interface LocationSuggestion {
+  location: string;
+  lat: number;
+  lon: number;
+}

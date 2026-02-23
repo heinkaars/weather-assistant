@@ -1,10 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-
-interface LocationSuggestion {
-  location: string;
-  lat: number;
-  lon: number;
-}
+import { fetchLocationSuggestions } from '../api/weather';
+import type { LocationSuggestion } from '../types';
 
 interface LocationAutocompleteProps {
   id: string;
@@ -67,17 +63,9 @@ export default function LocationAutocomplete({
     debounceTimer.current = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(
-          `/api/geocode?location=${encodeURIComponent(inputValue)}&autocomplete=true`
-        );
-        
-        if (response.ok) {
-          const data = await response.json();
-          setSuggestions(data.suggestions || []);
-          setShowSuggestions(true);
-        } else {
-          setSuggestions([]);
-        }
+        const results = await fetchLocationSuggestions(inputValue);
+        setSuggestions(results);
+        setShowSuggestions(results.length > 0);
       } catch (error) {
         console.error('Autocomplete error:', error);
         setSuggestions([]);
