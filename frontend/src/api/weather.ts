@@ -1,6 +1,7 @@
 import type { WeatherComparisonData, WeatherData } from '../types';
 
-const API_BASE = '/api';
+// Use env in production (e.g. Render backend URL); same-origin /api in dev (Vite proxy)
+const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
 
 interface GeocodeResponse {
   location: string;
