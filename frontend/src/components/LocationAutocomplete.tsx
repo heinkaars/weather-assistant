@@ -30,7 +30,7 @@ export default function LocationAutocomplete({
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [justSelected, setJustSelected] = useState(false); // Prevent search after selection
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const debounceTimer = useRef<NodeJS.Timeout>();
+  const debounceTimer = useRef<ReturnType<typeof setTimeout>>();
 
   // Close suggestions when clicking outside
   useEffect(() => {
