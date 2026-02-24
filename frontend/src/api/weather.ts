@@ -1,4 +1,4 @@
-import type { WeatherComparisonData, WeatherData, LocationSuggestion } from '../types';
+import type { WeatherComparisonData, WeatherData, LocationSuggestion, LocationWithCoords } from '../types';
 
 // Use env in production (e.g. Render backend URL); same-origin /api in dev (Vite proxy)
 const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
@@ -54,14 +54,17 @@ export async function fetchWeather(lat: number, lon: number): Promise<WeatherDat
 }
 
 export async function fetchWeatherComparison(
-  location1: string,
-  location2: string
+  location1: string | LocationWithCoords,
+  location2: string | LocationWithCoords
 ): Promise<WeatherComparisonData> {
-  // Geocode both locations
-  const [geo1, geo2] = await Promise.all([
-    geocodeLocation(location1),
-    geocodeLocation(location2),
-  ]);
+  // If we have coordinates, use them directly; otherwise geocode
+  const geo1 = typeof location1 === 'string' 
+    ? await geocodeLocation(location1)
+    : { location: location1.name, lat: location1.lat, lon: location1.lon };
+  
+  const geo2 = typeof location2 === 'string'
+    ? await geocodeLocation(location2)
+    : { location: location2.name, lat: location2.lat, lon: location2.lon };
 
   // Fetch weather for both locations
   const [weather1, weather2] = await Promise.all([

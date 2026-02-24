@@ -40,3 +40,9 @@ export interface LocationSuggestion {
   lat: number;
   lon: number;
 }
+
+export interface LocationWithCoords {
+  name: string;
+  lat: number;
+  lon: number;
+}

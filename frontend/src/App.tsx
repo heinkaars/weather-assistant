@@ -5,14 +5,17 @@ import Recommendations from './components/Recommendations';
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorMessage from './components/ErrorMessage';
 import { fetchWeatherComparison } from './api/weather';
-import type { WeatherComparisonData } from './types';
+import type { WeatherComparisonData, LocationWithCoords } from './types';
 
 function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [comparisonData, setComparisonData] = useState<WeatherComparisonData | null>(null);
 
-  const handleCompare = async (location1: string, location2: string) => {
+  const handleCompare = async (
+    location1: LocationWithCoords,
+    location2: LocationWithCoords
+  ) => {
     setLoading(true);
     setError(null);
     setComparisonData(null);

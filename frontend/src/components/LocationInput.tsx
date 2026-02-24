@@ -1,8 +1,9 @@
 import { useState, FormEvent } from 'react';
 import LocationAutocomplete from './LocationAutocomplete';
+import type { LocationWithCoords } from '../types';
 
 interface LocationInputProps {
-  onCompare: (location1: string, location2: string) => void;
+  onCompare: (location1: LocationWithCoords, location2: LocationWithCoords) => void;
   loading: boolean;
 }
 
@@ -19,7 +20,7 @@ export default function LocationInput({ onCompare, loading }: LocationInputProps
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (location1 && location2) {
-      onCompare(location1.name, location2.name);
+      onCompare(location1, location2);
     }
   };
 
