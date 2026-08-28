@@ -94,7 +94,7 @@ FogCast/
 ### Weather.gov (National Weather Service)
 - ✅ No API key required
 - ✅ No rate limits
-- ✅ US locations only (perfect for Bay Area)
+- ✅ US locations only (incl. DC and US territories)
 - 📍 Requires: coordinates → grid point → forecast
 
 ### Nominatim (OpenStreetMap)
@@ -115,9 +115,9 @@ FogCast/
    - Beaches: "Ocean Beach, SF", "Baker Beach"
    - Cities: "Oakland", "Berkeley", "San Francisco"
 
-2. **Best for Bay Area:**
-   - The app is optimized for Bay Area microclimates
-   - AI knows about fog patterns, temperature variations, etc.
+2. **Microclimate comparisons:**
+   - The AI infers regional weather expertise from the locations you pick
+   - It knows about fog patterns, temperature variations, etc.
    - Try comparing coastal vs inland locations!
 
 3. **Caching:**
@@ -133,14 +133,14 @@ FogCast/
 - Restart the backend server after adding the key
 
 ### "Location not found"
-- Try being more specific: add "Bay Area, CA" or "San Francisco"
+- Try being more specific: add the city or state, e.g. "Portland, OR"
 - Use well-known landmarks or neighborhoods
 - Check spelling
 
 ### "Location not supported" (Weather.gov)
 - Weather.gov only covers US locations
 - Make sure location is within the United States
-- Bay Area locations should always work
+- DC and US territories (PR, GU, VI) are supported
 
 ### CORS errors
 - Make sure both servers are running
@@ -173,6 +173,6 @@ cd backend && npm run build
 2. **Install dependencies** with `npm run install:all`
 3. **Start the servers** with `npm run dev`
 4. **Open http://localhost:5173** in your browser
-5. **Compare two Bay Area locations!**
+5. **Compare any two US locations!**
 
-Enjoy exploring Bay Area microclimates! 🌁☀️🌤️
+Enjoy exploring US microclimates! 🌁☀️🌤️
