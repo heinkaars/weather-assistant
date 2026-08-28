@@ -5,7 +5,7 @@ import { logger } from '../logger.js';
 
 export const weatherRouter = express.Router();
 
-const USER_AGENT = 'FogCast/1.0 (Bay Area Weather App)';
+const USER_AGENT = 'FogCast/1.0 (US Weather Comparison App)';
 
 interface GridPoint {
   properties: {
@@ -50,7 +50,7 @@ weatherRouter.get('/', async (req, res) => {
       if (pointsResponse.status === 404) {
         return res.status(404).json({ 
           error: 'Location not supported',
-          message: 'Weather.gov only covers US locations. Make sure your location is in the Bay Area.'
+          message: 'Weather.gov only covers US locations, including DC and US territories.'
         });
       }
       throw new Error(`Weather.gov points API error: ${pointsResponse.status}`);
