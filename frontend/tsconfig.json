@@ -21,5 +21,8 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src"],
+  /* Tests are typechecked by tsconfig.test.json instead, so that a production
+     build never depends on devDependencies being installed. */
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
