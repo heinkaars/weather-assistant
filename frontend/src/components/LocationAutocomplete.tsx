@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { fetchLocationSuggestions } from '../api/weather';
 import type { LocationSuggestion } from '../types';
+import { formatLocation } from '../utils/formatLocation';
 
 interface LocationAutocompleteProps {
   id: string;
@@ -116,103 +117,6 @@ export default function LocationAutocomplete({
         setShowSuggestions(false);
         break;
     }
-  };
-
-  // Format location for display - show number, street, city, state
-  const formatLocation = (loc: string) => {
-    const parts = loc.split(', ');
-    
-    if (parts.length < 2) {
-      return loc;
-    }
-    
-    // Nominatim format varies:
-    // [Number], [Street], [Neighborhood], [City], [County], [State], [ZIP], [Country]
-    // OR: [Street], [Neighborhood], [City], [County], [State], [ZIP], [Country]
-    
-    // Map of state names to abbreviations
-    const stateAbbr: { [key: string]: string } = {
-      'Alabama': 'AL', 'Alaska': 'AK', 'Arizona': 'AZ', 'Arkansas': 'AR', 'California': 'CA',
-      'Colorado': 'CO', 'Connecticut': 'CT', 'Delaware': 'DE', 'Florida': 'FL', 'Georgia': 'GA',
-      'Hawaii': 'HI', 'Idaho': 'ID', 'Illinois': 'IL', 'Indiana': 'IN', 'Iowa': 'IA',
-      'Kansas': 'KS', 'Kentucky': 'KY', 'Louisiana': 'LA', 'Maine': 'ME', 'Maryland': 'MD',
-      'Massachusetts': 'MA', 'Michigan': 'MI', 'Minnesota': 'MN', 'Mississippi': 'MS', 'Missouri': 'MO',
-      'Montana': 'MT', 'Nebraska': 'NE', 'Nevada': 'NV', 'New Hampshire': 'NH', 'New Jersey': 'NJ',
-      'New Mexico': 'NM', 'New York': 'NY', 'North Carolina': 'NC', 'North Dakota': 'ND', 'Ohio': 'OH',
-      'Oklahoma': 'OK', 'Oregon': 'OR', 'Pennsylvania': 'PA', 'Rhode Island': 'RI', 'South Carolina': 'SC',
-      'South Dakota': 'SD', 'Tennessee': 'TN', 'Texas': 'TX', 'Utah': 'UT', 'Vermont': 'VT',
-      'Virginia': 'VA', 'Washington': 'WA', 'West Virginia': 'WV', 'Wisconsin': 'WI', 'Wyoming': 'WY'
-    };
-    
-    // Find state in the address
-    const stateIndex = parts.findIndex(p => stateAbbr[p]);
-    if (stateIndex === -1) {
-      // No recognized state, return first 2 parts
-      return parts.slice(0, 2).join(', ');
-    }
-    
-    const stateName = parts[stateIndex];
-    const stateCode = stateAbbr[stateName];
-    
-    // Build the address components
-    let addressPart = '';
-    let city = '';
-    
-    // Check if first part is a number/address range (like "646;648" or "646")
-    const firstPart = parts[0];
-    const hasNumber = /^\d/.test(firstPart);
-    
-    if (hasNumber && parts.length > 1) {
-      // First part is number, second part is likely street name
-      const number = firstPart.replace(/;/g, '-'); // "646;648" -> "646-648"
-      const street = parts[1];
-      
-      // Check if street looks like a street name (contains keywords or is mostly letters)
-      const streetKeywords = /\b(street|st|avenue|ave|road|rd|drive|dr|boulevard|blvd|way|lane|ln|place|pl|court|ct|circle|cir)\b/i;
-      if (streetKeywords.test(street) || !/^\d+$/.test(street)) {
-        addressPart = `${number} ${street}`;
-        
-        // Find city (skip neighborhoods, counties)
-        for (let i = 2; i < stateIndex; i++) {
-          const part = parts[i];
-          if (!part.includes('County') && !/^\d+$/.test(part)) {
-            city = part;
-            break;
-          }
-        }
-      } else {
-        // Second part isn't a street name, first part is the place
-        addressPart = number;
-        // Find city
-        for (let i = 1; i < stateIndex; i++) {
-          const part = parts[i];
-          if (!part.includes('County') && !/^\d+$/.test(part)) {
-            city = part;
-            break;
-          }
-        }
-      }
-    } else {
-      // No number in first part, it's a place name
-      addressPart = firstPart;
-      
-      // Find city
-      for (let i = 1; i < stateIndex; i++) {
-        const part = parts[i];
-        if (!part.includes('County') && !/^\d+$/.test(part)) {
-          city = part;
-          break;
-        }
-      }
-    }
-    
-    // Format: "Number Street, City, ST" or "Place, City, ST"
-    if (city && city !== addressPart) {
-      return `${addressPart}, ${city}, ${stateCode}`;
-    }
-    
-    // Fallback: Address, ST
-    return `${addressPart}, ${stateCode}`;
   };
 
   return (
