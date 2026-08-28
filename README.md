@@ -1,5 +1,7 @@
 # FogCast - US Weather Comparison Assistant
 
+[![CI](https://github.com/heinkaars/FogCast/actions/workflows/ci.yml/badge.svg)](https://github.com/heinkaars/FogCast/actions/workflows/ci.yml)
+
 A mobile-first web app that compares weather between any two US locations and provides intelligent AI-powered recommendations.
 
 ## Features
@@ -39,6 +41,10 @@ Create a `.env` file in the root directory:
 # .env
 OPENAI_API_KEY=your-api-key-here
 PORT=3001
+
+# Comma-separated origins allowed to call the API.
+# Required in production; localhost:5173 is always allowed in dev.
+ALLOWED_ORIGINS=
 ```
 
 **Get your OpenAI API key:** https://platform.openai.com/api-keys
@@ -67,7 +73,7 @@ The app will be available at:
 
 | API | Key Required | Rate Limit | Notes |
 |-----|--------------|------------|-------|
-| **Weather.gov** | ❌ No | None | US locations only (perfect for Bay Area) |
+| **Weather.gov** | ❌ No | None | US locations only (incl. DC and territories) |
 | **Nominatim** | ❌ No | 1 req/sec | Handled by backend with proper User-Agent |
 | **OpenAI GPT-4o-mini** | ✅ Yes | Per account | ~$0.15/1M input tokens, ~$0.60/1M output tokens |
 
@@ -81,6 +87,9 @@ FogCast/
 │   │   ├── types.ts              # TypeScript type definitions
 │   │   ├── api/
 │   │   │   └── weather.ts        # API client for backend
+│   │   ├── utils/
+│   │   │   ├── formatLocation.ts         # Nominatim address → short label
+│   │   │   └── formatLocation.test.ts    # Unit tests
 │   │   └── components/
 │   │       ├── LocationAutocomplete.tsx  # Smart location search with autocomplete
 │   │       ├── LocationInput.tsx         # Location input container
@@ -94,13 +103,16 @@ FogCast/
 ├── backend/                       # Express API server
 │   ├── src/
 │   │   ├── server.ts             # Main server entry point
+│   │   ├── config.ts             # Env loading + startup validation
 │   │   ├── cache.ts              # Request caching (10 min TTL)
+│   │   ├── rateLimit.ts          # Per-IP rate limiters
 │   │   └── routes/
 │   │       ├── geocode.ts        # Nominatim API proxy with autocomplete
 │   │       ├── weather.ts        # Weather.gov API proxy
 │   │       └── recommendations.ts # OpenAI integration for AI advice
 │   └── package.json
 │
+├── .github/workflows/ci.yml      # Typecheck + test + build on every PR
 ├── .env                          # Environment variables (create this)
 ├── .gitignore                    # Git ignore rules
 ├── package.json                  # Root package with dev scripts
@@ -144,7 +156,15 @@ npm run dev:frontend
 # Build for production
 cd frontend && npm run build
 cd backend && npm run build
+
+# Run the test suite
+npm test
+
+# Typecheck both workspaces
+npm run typecheck
 ```
+
+These are the same checks CI runs on every pull request.
 
 ### Key Features Implemented
 
@@ -166,7 +186,7 @@ cd backend && npm run build
 - Restart the backend server after adding the key
 
 ### "Location not found"
-- Try being more specific (e.g., add "SF" or "Bay Area, CA")
+- Try being more specific (e.g., add the city or state, like "Portland, OR")
 - Use well-known landmarks or neighborhoods
 - Check spelling
 
@@ -174,6 +194,11 @@ cd backend && npm run build
 - Ensure both frontend and backend are running
 - Frontend should be on http://localhost:5173
 - Backend should be on http://localhost:3001
+- In development, `http://localhost:5173` is allowed automatically
+- In production, the backend only accepts origins listed in `ALLOWED_ORIGINS` — set it to your deployed frontend URL (see [DEPLOY.md](./DEPLOY.md))
+
+### "Too many requests" (HTTP 429)
+The API is rate limited per IP: 300 requests / 15 minutes overall, and 20 / hour for AI recommendations (each call costs OpenAI credits). Adjust the limits in [`backend/src/rateLimit.ts`](./backend/src/rateLimit.ts) if you need different thresholds.
 
 ## Contributing
 
