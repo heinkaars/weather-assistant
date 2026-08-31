@@ -10,6 +10,27 @@ const NOMINATIM_BASE_URL = 'https://nominatim.openstreetmap.org';
 let lastRequestTime = 0;
 const MIN_REQUEST_INTERVAL = 1000; // 1 second
 
+// Concurrent requests chain onto this promise so each one reserves its slot
+// (and reads/writes lastRequestTime) strictly after the previous one finished,
+// instead of racing to check-then-set the same shared timestamp.
+let requestChain: Promise<void> = Promise.resolve();
+
+const reserveRequestSlot = (): Promise<void> => {
+  const slot = requestChain.then(async () => {
+    const now = Date.now();
+    const timeSinceLastRequest = now - lastRequestTime;
+
+    if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
+      await new Promise(resolve => setTimeout(resolve, MIN_REQUEST_INTERVAL - timeSinceLastRequest));
+    }
+
+    lastRequestTime = Date.now();
+  });
+
+  requestChain = slot.catch(() => {});
+  return slot;
+};
+
 // Helper to enhance location query for US context (smart enhancement)
 const enhanceLocationQuery = (location: string): string => {
   const lower = location.toLowerCase();
@@ -44,14 +65,7 @@ const enhanceLocationQuery = (location: string): string => {
 };
 
 const rateLimitedFetch = async (url: string): Promise<Response> => {
-  const now = Date.now();
-  const timeSinceLastRequest = now - lastRequestTime;
-  
-  if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
-    await new Promise(resolve => setTimeout(resolve, MIN_REQUEST_INTERVAL - timeSinceLastRequest));
-  }
-  
-  lastRequestTime = Date.now();
+  await reserveRequestSlot();
   return fetch(url, {
     headers: {
       'User-Agent': USER_AGENT,
