@@ -32,7 +32,7 @@ const reserveRequestSlot = (): Promise<void> => {
 };
 
 // Helper to enhance location query for US context (smart enhancement)
-const enhanceLocationQuery = (location: string): string => {
+export const enhanceLocationQuery = (location: string): string => {
   const lower = location.toLowerCase();
   
   // Already has context (state, country, or major city)

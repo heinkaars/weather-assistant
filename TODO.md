@@ -27,12 +27,15 @@ promise chain (`requestChain` / `reserveRequestSlot`) so each caller
 reserves its slot synchronously, before any `await`, instead of
 racing on a shared mutable timestamp.
 
-## 4. Backend has no tests
+## 4. Backend has no tests ✅
 
-No test script in `backend/package.json`. Add `node:test`-based tests
-(Node 20+ built-in runner, no new dependency needed). Start with
-`enhanceLocationQuery` in `geocode.ts`, then the CORS origin callback and
-`validateConfig` in `config.ts`.
+**Done 2026-09-01.** Added a `node:test`-based `test` script to
+`backend/package.json` (run via `tsx` for TS support, no new dependency)
+covering `enhanceLocationQuery` in `geocode.ts` and `generateCacheKey` in
+`cache.ts`. The CORS origin callback and `validateConfig` mentioned below
+live in `config.ts`, which only exists on the unmerged `harden-api-and-add-tests`
+branch (item 2) — not testable on `main` yet, so left for a future run once
+that lands.
 
 ## 5. Per-process cache / rate-limit counters (deliberate deferral, not a bug)
 
@@ -88,3 +91,7 @@ actionable by the automated routine.
   in `backend/src/routes/geocode.ts` by serializing requests through a
   promise chain instead of a non-atomic check-then-set on
   `lastRequestTime`.
+- **2026-09-01** — Item 4: Added `node:test`-based tests for
+  `enhanceLocationQuery` (`backend/src/routes/geocode.ts`) and
+  `generateCacheKey` (`backend/src/cache.ts`), plus a `test` script in
+  `backend/package.json` (`node --import tsx --test`).
