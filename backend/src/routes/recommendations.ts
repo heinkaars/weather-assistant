@@ -1,7 +1,14 @@
 import express from 'express';
 import OpenAI from 'openai';
+import { config } from '../config.js';
 
 export const recommendationsRouter = express.Router();
+
+// Built once at startup rather than per request. In production a missing key
+// already aborts boot (see validateConfig), so this is only null in dev.
+const openai = config.openaiApiKey
+  ? new OpenAI({ apiKey: config.openaiApiKey })
+  : null;
 
 interface WeatherData {
   location: string;
@@ -28,17 +35,12 @@ recommendationsRouter.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Missing required weather comparison data' });
     }
 
-    if (!process.env.OPENAI_API_KEY) {
-      return res.status(500).json({ 
+    if (!openai) {
+      return res.status(503).json({
         error: 'OpenAI API key not configured',
-        message: 'Please add OPENAI_API_KEY to your .env file'
+        message: 'Please add OPENAI_API_KEY to your .env file and restart the server'
       });
     }
-
-    // Initialize OpenAI client with the API key from environment
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
 
     console.log(`→ Generating recommendations for ${location1} vs ${location2}`);
 

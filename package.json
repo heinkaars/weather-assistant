@@ -1,15 +1,17 @@
 {
   "name": "fogcast",
   "version": "1.0.0",
-  "description": "Bay Area Microclimate Weather Assistant",
+  "description": "US Weather Comparison Assistant",
   "type": "module",
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
-    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install"
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "test": "cd frontend && npm test",
+    "typecheck": "cd backend && npx tsc --noEmit && cd ../frontend && npx tsc --noEmit"
   },
-  "keywords": ["weather", "bay-area", "microclimate"],
+  "keywords": ["weather", "comparison", "microclimate", "forecast"],
   "author": "",
   "license": "MIT",
   "devDependencies": {
