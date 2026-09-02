@@ -101,6 +101,9 @@ FogCast/
 │   │       └── recommendations.ts # OpenAI integration for AI advice
 │   └── package.json
 │
+├── shared/
+│   └── types.d.ts                # WeatherPeriod/WeatherData types shared by frontend + backend
+│
 ├── .env                          # Environment variables (create this)
 ├── .gitignore                    # Git ignore rules
 ├── package.json                  # Root package with dev scripts

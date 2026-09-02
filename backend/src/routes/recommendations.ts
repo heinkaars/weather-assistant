@@ -1,28 +1,19 @@
 import express from 'express';
 import OpenAI from 'openai';
+import type { WeatherData } from '../../../shared/types.js';
 
 export const recommendationsRouter = express.Router();
 
-interface WeatherData {
-  location: string;
-  current: {
-    temperature: number;
-    temperatureUnit: string;
-    windSpeed: string;
-    shortForecast: string;
-    relativeHumidity?: { value: number | null };
-  };
-  hourly: Array<{
-    startTime: string;
-    temperature: number;
-    windSpeed: string;
-    shortForecast: string;
-  }>;
+interface RecommendationsRequestBody {
+  location1: string;
+  location2: string;
+  weather1: WeatherData;
+  weather2: WeatherData;
 }
 
 recommendationsRouter.post('/', async (req, res) => {
   try {
-    const { location1, location2, weather1, weather2 } = req.body;
+    const { location1, location2, weather1, weather2 } = req.body as RecommendationsRequestBody;
 
     if (!location1 || !location2 || !weather1 || !weather2) {
       return res.status(400).json({ error: 'Missing required weather comparison data' });

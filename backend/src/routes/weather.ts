@@ -1,5 +1,6 @@
 import express from 'express';
 import { weatherCache, generateCacheKey } from '../cache.js';
+import type { WeatherPeriod, WeatherData } from '../../../shared/types.js';
 
 export const weatherRouter = express.Router();
 
@@ -9,27 +10,6 @@ interface GridPoint {
   properties: {
     forecast: string;
     forecastHourly: string;
-  };
-}
-
-interface WeatherPeriod {
-  number: number;
-  name: string;
-  startTime: string;
-  endTime: string;
-  temperature: number;
-  temperatureUnit: string;
-  windSpeed: string;
-  shortForecast: string;
-  detailedForecast: string;
-  probabilityOfPrecipitation?: {
-    value: number | null;
-  };
-  relativeHumidity?: {
-    value: number | null;
-  };
-  dewpoint?: {
-    value: number | null;
   };
 }
 
@@ -94,7 +74,7 @@ weatherRouter.get('/', async (req, res) => {
     const now = new Date();
     const todayPeriods = periods.slice(0, 12);
 
-    const result = {
+    const result: WeatherData = {
       location: { lat: latitude, lon: longitude },
       current: todayPeriods[0],
       hourly: todayPeriods,

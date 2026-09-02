@@ -44,11 +44,23 @@ so they don't share state across multiple backend instances/processes.
 This is a known, accepted limitation for the current single-process
 deployment, documented here so it isn't "fixed" by mistake later.
 
-## 6. WeatherPeriod/WeatherData types duplicated
+## 6. WeatherPeriod/WeatherData types duplicated ✅
 
-`frontend/src/types.ts` and inline types in `backend/src/routes/weather.ts`
-and `recommendations.ts` duplicate the same shapes. Consolidate into a
-single shared file both sides import from.
+**Done 2026-09-02.** Added `shared/types.d.ts` as the single canonical
+source for `WeatherPeriod`/`WeatherData`, imported via `import type` from
+`frontend/src/types.ts`, `backend/src/routes/weather.ts`, and
+`backend/src/routes/recommendations.ts` (the old local interfaces are
+removed). Used a `.d.ts` declaration file specifically because the backend's
+`tsconfig.json` has `rootDir: "./src"`; a `.ts` file outside that directory
+trips a `TS6059` rootDir violation on `import type`, but a `.d.ts` (never
+emitted) doesn't. Along the way, `recommendations.ts`'s duplicated
+`WeatherData` interface turned out to be dead code — it declared a shape
+(`location: string`, narrowed `current`/`hourly`) that never matched what
+the frontend actually sends (`weather1`/`weather2` are the full
+`WeatherData` objects with `location: {lat, lon}`), and the route body
+was destructured from untyped `req.body` without ever using the interface.
+Replaced it with a real `RecommendationsRequestBody` type built on the
+shared `WeatherData`, which now actually types the destructure.
 
 ## 7. Logging is console.log only
 
@@ -95,3 +107,10 @@ actionable by the automated routine.
   `enhanceLocationQuery` (`backend/src/routes/geocode.ts`) and
   `generateCacheKey` (`backend/src/cache.ts`), plus a `test` script in
   `backend/package.json` (`node --import tsx --test`).
+- **2026-09-02** — Item 6: Consolidated `WeatherPeriod`/`WeatherData` into
+  `shared/types.d.ts`, imported by both `frontend/src/types.ts` and the
+  backend routes that used to redeclare them. Found and fixed a latent bug
+  along the way: `recommendations.ts`'s local `WeatherData` interface was
+  dead code with a shape that never matched the actual request body; it's
+  now replaced with a `RecommendationsRequestBody` type that correctly
+  types `req.body`.
