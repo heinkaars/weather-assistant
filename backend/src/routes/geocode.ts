@@ -1,5 +1,6 @@
 import express from 'express';
 import { geocodeCache, generateCacheKey } from '../cache.js';
+import { logger } from '../logger.js';
 
 export const geocodeRouter = express.Router();
 
@@ -89,12 +90,12 @@ geocodeRouter.get('/', async (req, res) => {
       const cachedResult = geocodeCache.get(cacheKey);
       
       if (cachedResult) {
-        console.log(`✓ Cache hit for geocode: ${location}`);
+        logger.info({ location }, 'Cache hit for geocode');
         return res.json({ ...cachedResult, cached: true });
       }
     }
 
-    console.log(`→ Fetching geocode for: ${location}${isAutocomplete ? ' (autocomplete)' : ''}`);
+    logger.info({ location, autocomplete: isAutocomplete }, 'Fetching geocode');
 
     // For autocomplete, use raw query (no enhancement)
     // For final selection, use smart enhancement
@@ -103,7 +104,7 @@ geocodeRouter.get('/', async (req, res) => {
       : enhanceLocationQuery(location);
     
     if (!isAutocomplete && searchQuery !== location) {
-      console.log(`  Enhanced query: ${searchQuery}`);
+      logger.info({ location, searchQuery }, 'Enhanced query');
     }
 
     // Geocode the location
@@ -121,7 +122,7 @@ geocodeRouter.get('/', async (req, res) => {
     const data = await response.json() as any[];
 
     if (isAutocomplete) {
-      console.log(`  Found ${data.length} results for autocomplete`);
+      logger.info({ count: data.length }, 'Found results for autocomplete');
     }
 
     if (!data || data.length === 0) {
@@ -145,7 +146,7 @@ geocodeRouter.get('/', async (req, res) => {
         }))
         .slice(0, 5);
 
-      console.log(`  Returning ${suggestions.length} suggestions`);
+      logger.info({ count: suggestions.length }, 'Returning suggestions');
       return res.json({ suggestions });
     }
 
@@ -163,11 +164,11 @@ geocodeRouter.get('/', async (req, res) => {
     // Cache the result
     const cacheKey = generateCacheKey('geocode', location);
     geocodeCache.set(cacheKey, result);
-    console.log(`✓ Cached geocode result for: ${location}`);
+    logger.info({ location }, 'Cached geocode result');
 
     res.json({ ...result, cached: false });
   } catch (error) {
-    console.error('Geocode error:', error);
+    logger.error({ err: error }, 'Geocode error');
     res.status(500).json({ 
       error: 'Failed to geocode location',
       message: error instanceof Error ? error.message : 'Unknown error'

@@ -62,10 +62,17 @@ was destructured from untyped `req.body` without ever using the interface.
 Replaced it with a real `RecommendationsRequestBody` type built on the
 shared `WeatherData`, which now actually types the destructure.
 
-## 7. Logging is console.log only
+## 7. Logging is console.log only ✅
 
-21 call sites across the backend use `console.log`/`console.error`
-directly. Introduce structured logging (pino suggested).
+**Done 2026-09-03.** Added `backend/src/logger.ts` exporting a single
+`pino` logger instance (`LOG_LEVEL` env var controls level, default
+`info`). Replaced all 16 `console.log`/`console.error` call sites across
+`server.ts`, `routes/geocode.ts`, `routes/weather.ts`, and
+`routes/recommendations.ts` with `logger.info`/`logger.error` calls,
+moving interpolated values into structured fields (e.g.
+`logger.info({ lat, lon }, 'Fetching weather')`) instead of template
+strings, and passing errors as `{ err: error }` so pino serializes the
+stack trace.
 
 ## 8. No React error boundary
 
@@ -114,3 +121,8 @@ actionable by the automated routine.
   dead code with a shape that never matched the actual request body; it's
   now replaced with a `RecommendationsRequestBody` type that correctly
   types `req.body`.
+- **2026-09-03** — Item 7: Added `backend/src/logger.ts` (a `pino`
+  instance) and replaced all 16 `console.log`/`console.error` sites in
+  `server.ts`, `routes/geocode.ts`, `routes/weather.ts`, and
+  `routes/recommendations.ts` with structured `logger.info`/`logger.error`
+  calls.

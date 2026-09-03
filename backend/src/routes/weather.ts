@@ -1,6 +1,7 @@
 import express from 'express';
 import { weatherCache, generateCacheKey } from '../cache.js';
 import type { WeatherPeriod, WeatherData } from '../../../shared/types.js';
+import { logger } from '../logger.js';
 
 export const weatherRouter = express.Router();
 
@@ -33,11 +34,11 @@ weatherRouter.get('/', async (req, res) => {
     const cachedResult = weatherCache.get(cacheKey);
     
     if (cachedResult) {
-      console.log(`✓ Cache hit for weather: ${lat},${lon}`);
+      logger.info({ lat, lon }, 'Cache hit for weather');
       return res.json({ ...cachedResult, cached: true });
     }
 
-    console.log(`→ Fetching weather for: ${lat},${lon}`);
+    logger.info({ lat, lon }, 'Fetching weather');
 
     // Step 1: Get grid point data
     const pointsUrl = `https://api.weather.gov/points/${latitude},${longitude}`;
@@ -83,11 +84,11 @@ weatherRouter.get('/', async (req, res) => {
 
     // Cache the result
     weatherCache.set(cacheKey, result);
-    console.log(`✓ Cached weather result for: ${lat},${lon}`);
+    logger.info({ lat, lon }, 'Cached weather result');
 
     res.json({ ...result, cached: false });
   } catch (error) {
-    console.error('Weather error:', error);
+    logger.error({ err: error }, 'Weather error');
     res.status(500).json({ 
       error: 'Failed to fetch weather data',
       message: error instanceof Error ? error.message : 'Unknown error'

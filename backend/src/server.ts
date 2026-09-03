@@ -6,6 +6,7 @@ import { dirname, resolve } from 'path';
 import { geocodeRouter } from './routes/geocode.js';
 import { weatherRouter } from './routes/weather.js';
 import { recommendationsRouter } from './routes/recommendations.js';
+import { logger } from './logger.js';
 
 // Get current file directory in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -33,6 +34,5 @@ app.get('/health', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 FogCast backend running on http://localhost:${PORT}`);
-  console.log(`📡 Frontend should connect to this server`);
+  logger.info({ port: PORT }, 'FogCast backend running');
 });

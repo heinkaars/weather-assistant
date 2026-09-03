@@ -1,6 +1,7 @@
 import express from 'express';
 import OpenAI from 'openai';
 import type { WeatherData } from '../../../shared/types.js';
+import { logger } from '../logger.js';
 
 export const recommendationsRouter = express.Router();
 
@@ -31,7 +32,7 @@ recommendationsRouter.post('/', async (req, res) => {
       apiKey: process.env.OPENAI_API_KEY,
     });
 
-    console.log(`→ Generating recommendations for ${location1} vs ${location2}`);
+    logger.info({ location1, location2 }, 'Generating recommendations');
 
     // Build location-aware system prompt that lets AI infer regional expertise
     const systemPrompt = `You are a knowledgeable weather expert providing advice for ${location1} and ${location2}. Use your knowledge of local weather patterns, microclimates, and regional climate to give practical, specific recommendations.`;
@@ -103,14 +104,14 @@ IMPORTANT: Each section header MUST be on its own line with nothing else on that
 
     const recommendations = completion.choices[0].message.content;
 
-    console.log(`✓ Generated recommendations`);
+    logger.info('Generated recommendations');
 
     res.json({
       recommendations,
       generatedAt: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Recommendations error:', error);
+    logger.error({ err: error }, 'Recommendations error');
     
     if (error instanceof OpenAI.APIError) {
       return res.status(error.status || 500).json({
