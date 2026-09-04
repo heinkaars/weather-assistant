@@ -74,10 +74,14 @@ moving interpolated values into structured fields (e.g.
 strings, and passing errors as `{ err: error }` so pino serializes the
 stack trace.
 
-## 8. No React error boundary
+## 8. No React error boundary ✅
 
-The frontend has no error boundary, so a render error blanks the whole
-app instead of degrading to a message.
+**Done 2026-09-04.** Added `frontend/src/components/ErrorBoundary.tsx`, a
+class-based error boundary (`getDerivedStateFromError` /
+`componentDidCatch`) styled consistently with the existing `ErrorMessage`
+card. Wrapped `<App />` with it in `main.tsx` so a render error now shows
+a "Something went wrong" card with a "Try again" reset button instead of
+blanking the whole app to a white screen.
 
 ## 9. No way to skip the OpenAI call
 
@@ -126,3 +130,7 @@ actionable by the automated routine.
   `server.ts`, `routes/geocode.ts`, `routes/weather.ts`, and
   `routes/recommendations.ts` with structured `logger.info`/`logger.error`
   calls.
+- **2026-09-04** — Item 8: Added `frontend/src/components/ErrorBoundary.tsx`
+  and wrapped `<App />` with it in `main.tsx`, so a render error now
+  degrades to a "Something went wrong" message with a reset button instead
+  of blanking the app.
