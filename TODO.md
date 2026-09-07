@@ -83,11 +83,15 @@ card. Wrapped `<App />` with it in `main.tsx` so a render error now shows
 a "Something went wrong" card with a "Try again" reset button instead of
 blanking the whole app to a white screen.
 
-## 9. No way to skip the OpenAI call
+## 9. No way to skip the OpenAI call ✅
 
-Every comparison spends OpenAI credits even when the user only wants the
-raw weather numbers. Add a path to see the raw comparison without the AI
-call.
+**Done 2026-09-07.** `frontend/src/components/Recommendations.tsx` used to
+call `fetchRecommendations` (and thus OpenAI) automatically in a `useEffect`
+as soon as comparison data loaded, so every comparison spent credits even
+if the user only wanted the raw weather numbers already shown in
+`WeatherComparison`. Changed it to opt-in: the component now renders a
+"Get AI Recommendations" button with a note that it uses OpenAI credits,
+and only fetches when the user clicks it.
 
 ## 10. LocationAutocomplete.tsx is not an accessible combobox
 
@@ -134,3 +138,7 @@ actionable by the automated routine.
   and wrapped `<App />` with it in `main.tsx`, so a render error now
   degrades to a "Something went wrong" message with a reset button instead
   of blanking the app.
+- **2026-09-07** — Item 9: `Recommendations.tsx` no longer calls OpenAI
+  automatically on mount; it now shows a "Get AI Recommendations" button
+  and only fetches when clicked, so viewing the raw weather comparison no
+  longer spends API credits.

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { fetchRecommendations } from '../api/weather';
 import type { WeatherData } from '../types';
 import LoadingSpinner from './LoadingSpinner';
@@ -67,26 +67,42 @@ function parseRecommendations(text: string): ParsedSection[] {
 
 export default function Recommendations({ location1, location2, weather1, weather2 }: RecommendationsProps) {
   const [recommendations, setRecommendations] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [requested, setRequested] = useState(false);
 
-  useEffect(() => {
-    const loadRecommendations = async () => {
-      setLoading(true);
-      setError(null);
+  const loadRecommendations = async () => {
+    setRequested(true);
+    setLoading(true);
+    setError(null);
 
-      try {
-        const recs = await fetchRecommendations(location1, location2, weather1, weather2);
-        setRecommendations(recs);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to generate recommendations');
-      } finally {
-        setLoading(false);
-      }
-    };
+    try {
+      const recs = await fetchRecommendations(location1, location2, weather1, weather2);
+      setRecommendations(recs);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to generate recommendations');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    loadRecommendations();
-  }, [location1, location2, weather1, weather2]);
+  if (!requested) {
+    return (
+      <div className="card">
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-2xl">🤖</span>
+          <h2 className="text-xl font-semibold text-gray-800">AI Recommendations</h2>
+        </div>
+        <p className="text-sm text-gray-600 mb-4">
+          Get AI-generated advice comparing these two locations. This sends the weather
+          data to OpenAI and uses API credits.
+        </p>
+        <button type="button" onClick={loadRecommendations} className="btn-primary">
+          Get AI Recommendations
+        </button>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -114,10 +130,10 @@ export default function Recommendations({ location1, location2, weather1, weathe
         <span className="text-2xl">🤖</span>
         <h2 className="text-xl font-semibold text-gray-800">AI Recommendations</h2>
       </div>
-      
+
       <div className="space-y-4">
         {sections.map((section, index) => (
-          <div 
+          <div
             key={index}
             className="p-4 rounded-lg bg-gradient-to-br from-white to-gray-50 border border-gray-200"
           >
