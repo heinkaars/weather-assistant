@@ -27,6 +27,8 @@ export default function LocationAutocomplete({
   const [justSelected, setJustSelected] = useState(false); // Prevent search after selection
   const wrapperRef = useRef<HTMLDivElement>(null);
   const debounceTimer = useRef<ReturnType<typeof setTimeout>>();
+  const listboxId = `${id}-listbox`;
+  const optionId = (index: number) => `${id}-option-${index}`;
 
   // Close suggestions when clicking outside
   useEffect(() => {
@@ -231,6 +233,12 @@ export default function LocationAutocomplete({
           className="input-field"
           disabled={disabled}
           autoComplete="off"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-haspopup="listbox"
+          aria-expanded={showSuggestions && suggestions.length > 0}
+          aria-controls={listboxId}
+          aria-activedescendant={selectedIndex >= 0 ? optionId(selectedIndex) : undefined}
         />
         {isLoading && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -238,13 +246,27 @@ export default function LocationAutocomplete({
           </div>
         )}
       </div>
+      <span className="sr-only" role="status" aria-live="polite">
+        {showSuggestions && suggestions.length > 0
+          ? `${suggestions.length} suggestion${suggestions.length === 1 ? '' : 's'} available`
+          : showSuggestions && inputValue.length >= 2 && suggestions.length === 0
+            ? 'No suggestions available'
+            : ''}
+      </span>
 
       {/* Suggestions Dropdown */}
       {showSuggestions && suggestions.length > 0 && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+        <div
+          id={listboxId}
+          role="listbox"
+          className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+        >
           {suggestions.map((suggestion, index) => (
             <button
               key={index}
+              id={optionId(index)}
+              role="option"
+              aria-selected={index === selectedIndex}
               type="button"
               onClick={() => handleSuggestionClick(suggestion)}
               className={`w-full text-left px-4 py-3 hover:bg-indigo-50 transition-colors border-b border-gray-100 last:border-b-0 ${

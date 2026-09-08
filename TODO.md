@@ -93,11 +93,18 @@ if the user only wanted the raw weather numbers already shown in
 "Get AI Recommendations" button with a note that it uses OpenAI credits,
 and only fetches when the user clicks it.
 
-## 10. LocationAutocomplete.tsx is not an accessible combobox
+## 10. LocationAutocomplete.tsx is not an accessible combobox ✅
 
-Missing `role="combobox"`, `aria-expanded`, `aria-activedescendant`.
-Arrow-key navigation works visually but screen readers don't announce
-suggestions, and the README claims keyboard-navigation accessibility.
+**Done 2026-09-08.** Added `role="combobox"`, `aria-autocomplete="list"`,
+`aria-haspopup="listbox"`, `aria-expanded`, `aria-controls`, and
+`aria-activedescendant` to the input in
+`frontend/src/components/LocationAutocomplete.tsx`, `role="listbox"` on the
+suggestions container with matching `id`, and `role="option"` /
+`aria-selected` / stable `id`s on each suggestion button so
+`aria-activedescendant` can reference the highlighted option. Also added a
+visually-hidden `aria-live="polite"` status span announcing the suggestion
+count (or "no suggestions") so screen reader users are told when
+suggestions appear, not just sighted users watching the dropdown.
 
 ## 11. UX niceties
 
@@ -142,3 +149,9 @@ actionable by the automated routine.
   automatically on mount; it now shows a "Get AI Recommendations" button
   and only fetches when clicked, so viewing the raw weather comparison no
   longer spends API credits.
+- **2026-09-08** — Item 10: Added full ARIA combobox semantics
+  (`role="combobox"`, `aria-expanded`, `aria-controls`,
+  `aria-activedescendant`, `role="listbox"`/`role="option"`, and an
+  `aria-live` status span) to `LocationAutocomplete.tsx` so screen readers
+  now announce suggestions and the highlighted option, matching the
+  existing sighted keyboard-navigation behavior.
