@@ -24,7 +24,10 @@ export default function LocationAutocomplete({
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  const [justSelected, setJustSelected] = useState(false); // Prevent search after selection
+  // Tracks the last value we committed (via selection or an external `value`
+  // change like a swap), so the fetch effect can tell "user is typing" apart
+  // from "value changed programmatically" without a one-shot flag.
+  const lastCommittedValue = useRef(value);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const debounceTimer = useRef<ReturnType<typeof setTimeout>>();
   const listboxId = `${id}-listbox`;
@@ -42,11 +45,20 @@ export default function LocationAutocomplete({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Sync from an external value change (e.g. the parent swapping locations)
+  // without treating it as user input that should trigger a new search.
+  useEffect(() => {
+    if (value !== lastCommittedValue.current) {
+      lastCommittedValue.current = value;
+      setInputValue(value);
+    }
+  }, [value]);
+
   // Fetch suggestions with debounce
   useEffect(() => {
-    // Don't search if we just selected a suggestion
-    if (justSelected) {
-      setJustSelected(false);
+    // Don't search again for a value we already committed (selection, or an
+    // external sync above) - only for text the user actually typed.
+    if (inputValue === lastCommittedValue.current) {
       return;
     }
 
@@ -89,7 +101,7 @@ export default function LocationAutocomplete({
   };
 
   const handleSuggestionClick = (suggestion: LocationSuggestion) => {
-    setJustSelected(true); // Prevent immediate re-search
+    lastCommittedValue.current = suggestion.location; // Prevent immediate re-search
     setInputValue(suggestion.location);
     onSelect(suggestion.location, suggestion.lat, suggestion.lon);
     setShowSuggestions(false);

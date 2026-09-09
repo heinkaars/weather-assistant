@@ -106,11 +106,21 @@ visually-hidden `aria-live="polite"` status span announcing the suggestion
 count (or "no suggestions") so screen reader users are told when
 suggestions appear, not just sighted users watching the dropdown.
 
-## 11. UX niceties
+## 11. UX niceties ✅
 
-Add a swap-locations button, add recent/favorite searches, and revisit
-the fragile `justSelected` flag in `LocationAutocomplete` that suppresses
-a re-search after selection.
+**Done 2026-09-09.** Added a swap-locations button in `LocationInput.tsx`
+between the two fields (disabled when both locations are empty), and a
+"Recent searches" chip list (persisted to `localStorage`, last 5 pairs,
+deduplicated and most-recent-first) that re-runs a past comparison on
+click. Also replaced the fragile `justSelected` boolean in
+`LocationAutocomplete.tsx` — a one-shot flag that had to be "consumed" at
+exactly the right point in the fetch effect — with a `lastCommittedValue`
+ref that the fetch effect compares `inputValue` against directly. This
+also made the swap button work correctly: swapping now updates each
+field's displayed value (needed a new effect syncing `inputValue` from the
+`value` prop, since the input previously only read its initial value once)
+without re-triggering a suggestions search, the same problem the old flag
+existed to solve for post-selection typing.
 
 ## 13. Local directory still named ~/FogCast
 
@@ -155,3 +165,10 @@ actionable by the automated routine.
   `aria-live` status span) to `LocationAutocomplete.tsx` so screen readers
   now announce suggestions and the highlighted option, matching the
   existing sighted keyboard-navigation behavior.
+- **2026-09-09** — Item 11: Added a swap-locations button and a
+  localStorage-backed recent-searches chip list to `LocationInput.tsx`.
+  Replaced the fragile `justSelected` one-shot flag in
+  `LocationAutocomplete.tsx` with a `lastCommittedValue` ref compared
+  against `inputValue`, and added a prop-sync effect so an externally
+  changed `value` (e.g. from swapping) updates the field without
+  re-triggering a suggestions search.
