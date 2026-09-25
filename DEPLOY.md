@@ -22,7 +22,8 @@ The app has two parts: **frontend** (Vercel) and **backend API** (Render). Deplo
    - **Key:** `NODE_ENV` → **Value:** `production`  
      (Required so the app trusts Render's proxy and rate-limits per real client IP.)
    - **Key:** `ALLOWED_ORIGINS` → **Value:** your Vercel frontend URL, e.g. `https://fogcast.vercel.app`  
-     (Comma-separate multiple origins, no trailing slash. You will not have this URL until Step 2 — deploy the frontend first, then come back and set it.)
+     (Comma-separate multiple origins, no trailing slash. You will not have this URL until Step 2 — deploy the frontend first, then come back and set it.)  
+     To also allow Vercel preview deployments, add a wildcard entry for your team's preview URLs, e.g. `https://fogcast-*-your-team.vercel.app`. `*` matches letters, digits and hyphens only, so it cannot match another domain.
 6. Click **Create Web Service** and wait for the first deploy.
 7. Copy your service URL, e.g. `https://fogcast-api.onrender.com` (no trailing slash). You’ll use this as `VITE_API_URL` in Step 2.
 
@@ -51,7 +52,7 @@ The app has two parts: **frontend** (Vercel) and **backend API** (Render). Deplo
 ## After Deployment
 
 - **Frontend:** Uses `VITE_API_URL` at build time, so all API calls go to your Render backend.
-- **Backend:** Only accepts browser requests from the origins listed in `ALLOWED_ORIGINS`. If the frontend shows CORS errors, confirm that variable exactly matches your Vercel domain (including `https://`, no trailing slash) and redeploy the backend.
+- **Backend:** Only accepts browser requests from the origins listed in `ALLOWED_ORIGINS`. If the frontend shows CORS errors, confirm that variable exactly matches your Vercel domain (including `https://`, no trailing slash) and redeploy the backend. For preview deployments, check the URL matches your `*` wildcard entry.
 - **Rate limits:** 300 requests / 15 min per IP across the API, and 20 / hour per IP on the OpenAI-backed `/api/recommendations` route. Clients receive HTTP 429 with a JSON message when exceeded.
 - **Startup validation:** In production the backend exits immediately if `OPENAI_API_KEY` or `ALLOWED_ORIGINS` is missing, so a misconfiguration shows up as a failed deploy rather than a broken feature. In development it only warns.
 

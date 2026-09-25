@@ -7,6 +7,7 @@ import { geocodeRouter } from './routes/geocode.js';
 import { weatherRouter } from './routes/weather.js';
 import { recommendationsRouter } from './routes/recommendations.js';
 import { apiLimiter, recommendationsLimiter } from './rateLimit.js';
+import { createOriginMatcher } from './origins.js';
 import { logger } from './logger.js';
 
 validateConfig();
@@ -20,6 +21,8 @@ if (config.isProduction) {
   app.set('trust proxy', 1);
 }
 
+const isOriginAllowed = createOriginMatcher(config.allowedOrigins);
+
 const corsOptions: CorsOptions = {
   origin(origin, callback) {
     // Requests without an Origin header (curl, health checks, server-to-server)
@@ -28,8 +31,7 @@ const corsOptions: CorsOptions = {
       return callback(null, true);
     }
 
-    const normalized = origin.replace(/\/$/, '');
-    if (config.allowedOrigins.includes(normalized)) {
+    if (isOriginAllowed(origin)) {
       return callback(null, true);
     }
 
