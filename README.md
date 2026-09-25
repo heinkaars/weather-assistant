@@ -201,6 +201,7 @@ These are the same checks CI runs on every pull request.
 - Backend should be on http://localhost:3001
 - In development, `http://localhost:5173` is allowed automatically
 - In production, the backend only accepts origins listed in `ALLOWED_ORIGINS` — set it to your deployed frontend URL (see [DEPLOY.md](./DEPLOY.md))
+- Vercel preview deployments need a wildcard entry such as `https://fogcast-*-your-team.vercel.app`
 
 ### "Too many requests" (HTTP 429)
 The API is rate limited per IP: 300 requests / 15 minutes overall, and 20 / hour for AI recommendations (each call costs OpenAI credits). Adjust the limits in [`backend/src/rateLimit.ts`](./backend/src/rateLimit.ts) if you need different thresholds.
