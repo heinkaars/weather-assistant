@@ -2,20 +2,28 @@
 
 Prioritized list of outstanding items for the FogCast repo. First authored 2026-08-28.
 
-## 1. Set ALLOWED_ORIGINS / NODE_ENV on Render
+## 1. Set ALLOWED_ORIGINS / NODE_ENV on Render ✅
 
-PR #1 (`harden-api-and-add-tests`) adds a CORS allowlist and startup config
-validation. Before merging, the repo owner needs to set `ALLOWED_ORIGINS`
-(the Vercel frontend URL) and `NODE_ENV=production` on Render, or the
-backend will reject all browser traffic or fail to boot. Manual action on
-Render, outside the repo — owner only.
+**Done 2026-09-25.** Set `NODE_ENV=production` and `ALLOWED_ORIGINS` on the
+Render service (`weather-assistant-8mem.onrender.com`). The production
+frontend is `https://weather-assistant-nine.vercel.app`. Also changed the
+Render build command to `cd backend && npm install --include=dev && npm run build`:
+with `NODE_ENV=production`, a plain `npm install` skips devDependencies, so
+`tsc` was missing and the build failed. `ALLOWED_ORIGINS` also carries a
+wildcard entry for Vercel previews
+(`https://weather-assistant-*-heins-projects-551259a7.vercel.app`, PR #2).
+Render auto-deploy was found to be off; deploys are currently manual.
 
-## 2. Merge PR #1
+## 2. Merge PR #1 ✅
 
-`harden-api-and-add-tests` — rate limiting, CORS allowlist, startup
-validation, a `formatLocation` bugfix + tests, and CI. Owner decision on
-timing/ordering relative to item 1 — not to be merged by the automated
-routine.
+**Done 2026-09-25.** Rebased `harden-api-and-add-tests` onto `main` to
+resolve conflicts with the pino logging and shared-types changes, then
+rebase-merged. During the rebase, the branch's `console.*` calls moved to
+`logger`, `.env` loading moved into `backend/src/env.ts` (so pino sees
+`LOG_LEVEL`), and CI gained a backend test step. The backend `test` script
+now lists files via `find`, because Node 20 (the CI floor) does not expand
+globs passed to `--test`. Verified live: CORS allows only the Vercel
+origins, and per-IP rate limiting is active.
 
 ## 3. Race condition in the Nominatim rate limiter ✅
 
@@ -172,3 +180,8 @@ actionable by the automated routine.
   against `inputValue`, and added a prop-sync effect so an externally
   changed `value` (e.g. from swapping) updates the field without
   re-triggering a suggestions search.
+- **2026-09-25** — Item 1: Set `NODE_ENV` and `ALLOWED_ORIGINS` on
+  Render, and fixed the Render build command (`npm install --include=dev`)
+  so `tsc` is installed under `NODE_ENV=production`.
+- **2026-09-25** — Item 2: Rebased PR #1 onto `main`, resolved conflicts,
+  and rebase-merged it. Hardened backend verified live on Render.
